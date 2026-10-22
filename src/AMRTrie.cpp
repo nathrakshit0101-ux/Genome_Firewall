@@ -12,14 +12,18 @@ void AMRTrie::clear() {
 }
 
 void AMRTrie::insertMarker(const std::string& marker, int recordIndex) {
-    if (marker.empty()) return;
+    insertMarker(marker.data(), marker.size(), recordIndex);
+}
+
+void AMRTrie::insertMarker(const char* marker, size_t len, int recordIndex) {
+    if (!marker || len == 0) return;
 
     // Fast O(1) Bloom Filter addition
-    bloomFilter.add(marker);
+    bloomFilter.add(marker, len);
 
     TrieNode* current = root;
-    for (char c : marker) {
-        int idx = charToIndex(c);
+    for (size_t i = 0; i < len; ++i) {
+        int idx = charToIndex(marker[i]);
         if (idx == -1) continue;
 
         if (!current->children[idx]) {
@@ -31,14 +35,20 @@ void AMRTrie::insertMarker(const std::string& marker, int recordIndex) {
 }
 
 bool AMRTrie::searchExact(const std::string& marker, int* outRecordIndex) const {
+    return searchExact(marker.data(), marker.size(), outRecordIndex);
+}
+
+bool AMRTrie::searchExact(const char* marker, size_t len, int* outRecordIndex) const {
+    if (!marker || len == 0) return false;
+
     // Fast O(1) Bloom Filter rejection check
-    if (!bloomFilter.contains(marker)) {
+    if (!bloomFilter.contains(marker, len)) {
         return false;
     }
 
     TrieNode* current = root;
-    for (char c : marker) {
-        int idx = charToIndex(c);
+    for (size_t i = 0; i < len; ++i) {
+        int idx = charToIndex(marker[i]);
         if (idx == -1) return false;
 
         if (!current->children[idx]) {
@@ -55,14 +65,22 @@ bool AMRTrie::searchExact(const std::string& marker, int* outRecordIndex) const 
 }
 
 bool AMRTrie::searchWithMismatch(const std::string& marker, int maxMismatches, int* outRecordIndex) const {
-    if (marker.empty() || !root) return false;
-    return searchMismatchHelper(root, marker, 0, maxMismatches, outRecordIndex);
+    return searchWithMismatch(marker.data(), marker.size(), maxMismatches, outRecordIndex);
+}
+
+bool AMRTrie::searchWithMismatch(const char* marker, size_t len, int maxMismatches, int* outRecordIndex) const {
+    if (!marker || len == 0 || !root) return false;
+    return searchMismatchHelper(root, marker, len, 0, maxMismatches, outRecordIndex);
 }
 
 bool AMRTrie::searchMismatchHelper(const TrieNode* node, const std::string& marker, size_t index, int mismatchesRemaining, int* outRecordIndex) const {
+    return searchMismatchHelper(node, marker.data(), marker.size(), index, mismatchesRemaining, outRecordIndex);
+}
+
+bool AMRTrie::searchMismatchHelper(const TrieNode* node, const char* marker, size_t len, size_t index, int mismatchesRemaining, int* outRecordIndex) const {
     if (!node) return false;
 
-    if (index == marker.length()) {
+    if (index == len) {
         if (node->markerRecordIndex >= 0) {
             if (outRecordIndex) *outRecordIndex = node->markerRecordIndex;
             return true;
@@ -75,7 +93,7 @@ bool AMRTrie::searchMismatchHelper(const TrieNode* node, const std::string& mark
 
     // Exact match branch first (highest branch probability)
     if (exactIdx >= 0 && node->children[exactIdx]) {
-        if (searchMismatchHelper(node->children[exactIdx], marker, index + 1, mismatchesRemaining, outRecordIndex)) {
+        if (searchMismatchHelper(node->children[exactIdx], marker, len, index + 1, mismatchesRemaining, outRecordIndex)) {
             return true;
         }
     }
@@ -84,7 +102,7 @@ bool AMRTrie::searchMismatchHelper(const TrieNode* node, const std::string& mark
     if (mismatchesRemaining > 0) {
         for (int i = 0; i < 4; ++i) {
             if (i != exactIdx && node->children[i]) {
-                if (searchMismatchHelper(node->children[i], marker, index + 1, mismatchesRemaining - 1, outRecordIndex)) {
+                if (searchMismatchHelper(node->children[i], marker, len, index + 1, mismatchesRemaining - 1, outRecordIndex)) {
                     return true;
                 }
             }

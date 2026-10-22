@@ -13,6 +13,8 @@ struct DrugModelWeights {
     double bias{0.0};            // Bias term b
 };
 
+class AMRDatabase;
+
 class LogisticRegressor {
 public:
     LogisticRegressor();
@@ -27,7 +29,10 @@ public:
     // Inference: Calculate resistance probability P for target drug given Binary Feature Vector X
     double predictProbability(const std::string& drugName, const std::vector<int>& featureVector) const;
 
-    // Initialize pre-trained weight matrices for target antibiotics
+    // Initialize empirical real-time weights directly from active AMR reference database
+    void calibrateFromDatabase(const AMRDatabase& db);
+
+    // Legacy fallback initializer
     void initializePretrainedWeights(size_t featureVectorSize);
 
     const std::unordered_map<std::string, DrugModelWeights>& getModels() const { return drugModels; }

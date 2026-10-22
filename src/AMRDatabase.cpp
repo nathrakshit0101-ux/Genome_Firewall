@@ -6,6 +6,12 @@
 
 // --- UNIVERSAL PARSERS ---
 
+static inline void trimLine(std::string& s) {
+    while (!s.empty() && (s.back() == '\r' || s.back() == '\n' || s.back() == ' ' || s.back() == '\t')) {
+        s.pop_back();
+    }
+}
+
 class FastaDBParser : public IDatabaseParser {
 public:
     std::vector<AMRRecord> parse(const std::string& filepath) override {
@@ -14,13 +20,15 @@ public:
         if (!file.is_open()) return records;
         std::string line, id, seq;
         while (std::getline(file, line)) {
+            trimLine(line);
             if (line.empty()) continue;
             if (line[0] == '>') {
                 if (!seq.empty()) {
                     records.push_back({id, seq, "Broad-Spectrum", "Gene", "FASTA_DB"});
                     seq.clear();
                 }
-                id = line.substr(1, line.find_first_of(" \t") - 1);
+                size_t ws = line.find_first_of(" \t");
+                id = (ws != std::string::npos) ? line.substr(1, ws - 1) : line.substr(1);
             } else {
                 seq += line;
             }
@@ -39,12 +47,19 @@ public:
         std::string line;
         std::getline(file, line); // Header
         while (std::getline(file, line)) {
+            trimLine(line);
             if (line.empty()) continue;
             std::stringstream ss(line);
             std::string token;
             std::vector<std::string> cols;
-            while (std::getline(ss, token, '\t')) cols.push_back(token);
-            if (cols.size() >= 3) records.push_back({cols[0], cols[1], cols[2], "TSV_Marker", "AMRFinder"});
+            while (std::getline(ss, token, '\t')) {
+                trimLine(token);
+                cols.push_back(token);
+            }
+            if (cols.size() >= 3) {
+                std::string recType = (cols.size() >= 4) ? cols[3] : "TSV_Marker";
+                records.push_back({cols[0], cols[1], cols[2], recType, "AMRFinder"});
+            }
         }
         return records;
     }
@@ -59,14 +74,20 @@ public:
         std::string line;
         std::getline(file, line); // Header
         while (std::getline(file, line)) {
+            trimLine(line);
             if (line.empty()) continue;
             std::stringstream ss(line);
-            std::string id, seq, drug;
+            std::string id, seq, drug, recType;
             std::getline(ss, id, ',');
             std::getline(ss, seq, ',');
             std::getline(ss, drug, ',');
+            std::getline(ss, recType, ',');
+            trimLine(id);
+            trimLine(seq);
+            trimLine(drug);
+            trimLine(recType);
             if (!id.empty() && !seq.empty()) {
-                records.push_back({id, seq, drug.empty() ? "Broad-Spectrum" : drug, "Gene", "CSV_DB"});
+                records.push_back({id, seq, drug.empty() ? "Broad-Spectrum" : drug, recType.empty() ? "Gene" : recType, "CSV_DB"});
             }
         }
         return records;
@@ -118,10 +139,11 @@ void AMRDatabase::loadFromFile(const std::string& filepath, AMRTrie& trie) {
         int recordIdx = static_cast<int>(databaseRecords.size());
         databaseRecords.push_back(rec);
 
-        // Index all overlapping 21-mers into Trie with record index
-        for (size_t i = 0; i <= rec.sequence.length() - KMER_LEN; ++i) {
-            std::string kmer = rec.sequence.substr(i, KMER_LEN);
-            trie.insertMarker(kmer, recordIdx);
+        // Index all overlapping 21-mers into Trie with zero temporary string allocation
+        const char* sPtr = rec.sequence.data();
+        const size_t maxI = rec.sequence.length() - KMER_LEN;
+        for (size_t i = 0; i <= maxI; ++i) {
+            trie.insertMarker(sPtr + i, KMER_LEN, recordIdx);
             ++kmerTotal;
         }
         ++added;

@@ -13,39 +13,53 @@ public:
     ~AMRBloomFilter() = default;
 
     void add(const std::string& kmer);
+    void add(const char* kmer, size_t len);
     bool contains(const std::string& kmer) const;
+    bool contains(const char* kmer, size_t len) const;
     void clear();
 
     size_t getBitSize() const { return bits.size(); }
 
 private:
-    static inline uint64_t hash1(const std::string& kmer) {
+    static inline uint64_t hash1(const char* kmer, size_t len) {
         uint64_t hash = 14695981039346656037ULL;
-        for (char c : kmer) {
-            hash ^= static_cast<uint64_t>(c);
+        for (size_t i = 0; i < len; ++i) {
+            hash ^= static_cast<uint64_t>(kmer[i]);
             hash *= 1099511628211ULL;
         }
         return hash;
     }
 
-    static inline uint64_t hash2(const std::string& kmer) {
+    static inline uint64_t hash2(const char* kmer, size_t len) {
         uint64_t hash = 0xcbf29ce484222325ULL;
-        for (char c : kmer) {
-            hash = (hash ^ static_cast<uint64_t>(c)) * 0x100000001b3ULL;
+        for (size_t i = 0; i < len; ++i) {
+            hash = (hash ^ static_cast<uint64_t>(kmer[i])) * 0x100000001b3ULL;
             hash = (hash << 13) | (hash >> 51);
         }
         return hash;
     }
 
-    static inline uint64_t hash3(const std::string& kmer) {
+    static inline uint64_t hash3(const char* kmer, size_t len) {
         uint64_t hash = 0;
         uint64_t p = 31;
         uint64_t p_pow = 1;
-        for (char c : kmer) {
-            hash = (hash + (static_cast<uint64_t>(c) - 'A' + 1) * p_pow);
+        for (size_t i = 0; i < len; ++i) {
+            hash = (hash + (static_cast<uint64_t>(kmer[i]) - 'A' + 1) * p_pow);
             p_pow = (p_pow * p);
         }
         return hash;
+    }
+
+    static inline uint64_t hash1(const std::string& kmer) {
+        return hash1(kmer.data(), kmer.size());
+    }
+
+    static inline uint64_t hash2(const std::string& kmer) {
+        return hash2(kmer.data(), kmer.size());
+    }
+
+    static inline uint64_t hash3(const std::string& kmer) {
+        return hash3(kmer.data(), kmer.size());
     }
 
     std::vector<bool> bits;

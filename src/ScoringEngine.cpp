@@ -57,12 +57,12 @@ void ScoringEngine::processSequenceChunk(const std::string& sequence, size_t kme
     std::unordered_map<std::string, bool> localTargetIntegrity;
 
     const size_t maxI = sequence.length() - kmerLength;
+    const char* seqData = sequence.data();
     for (size_t i = 0; i <= maxI; ++i) {
-        std::string kmer = sequence.substr(i, kmerLength);
-
         int recordIdx = -1;
-        // Fast-path exact match with Bloom filter pre-check
-        if (amrTrie.searchExact(kmer, &recordIdx)) {
+        const char* kmerPtr = seqData + i;
+        // Fast-path exact match with Bloom filter pre-check (zero allocations)
+        if (amrTrie.searchExact(kmerPtr, kmerLength, &recordIdx)) {
             localExact++;
             if (recordIdx >= 0 && static_cast<size_t>(recordIdx) < numRecords) {
                 featureVectorAtomics[recordIdx].store(1, std::memory_order_relaxed);
@@ -73,7 +73,7 @@ void ScoringEngine::processSequenceChunk(const std::string& sequence, size_t kme
                     localDirectHits[rec.targetDrug]++;
                 }
             }
-        } else if (fuzzyMatchEnabled && amrTrie.searchWithMismatch(kmer, 1, &recordIdx)) {
+        } else if (fuzzyMatchEnabled && amrTrie.searchWithMismatch(kmerPtr, kmerLength, 1, &recordIdx)) {
             localMutated++;
             if (recordIdx >= 0 && static_cast<size_t>(recordIdx) < numRecords) {
                 featureVectorAtomics[recordIdx].store(1, std::memory_order_relaxed);

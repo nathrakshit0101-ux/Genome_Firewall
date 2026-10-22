@@ -24,6 +24,7 @@ SOURCES  = $(SRCDIR)/AMRDatabase.cpp \
            $(SRCDIR)/LogisticRegressor.cpp \
            $(SRCDIR)/PredictorEngine.cpp \
            $(SRCDIR)/ScoringEngine.cpp \
+           $(SRCDIR)/ProteomeTranslator.cpp \
            $(SRCDIR)/REPLShell.cpp \
            $(SRCDIR)/main.cpp
 
@@ -39,14 +40,18 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJDIR):
-	-mkdir $(OBJDIR) 2>NUL || mkdir -p $(OBJDIR)
+	@mkdir -p $(OBJDIR) 2>/dev/null || cmd /c "if not exist $(OBJDIR) mkdir $(OBJDIR)" 2>nul || true
 
 clean:
-	-del /Q $(OBJDIR)\*.o 2>NUL || rm -f $(OBJDIR)/*.o
-	-del /Q $(TARGET).exe $(TARGET) 2>NUL || rm -f $(TARGET).exe $(TARGET)
+	@rm -f $(OBJDIR)/*.o $(TARGET).exe $(TARGET) test_suite* 2>/dev/null || cmd /c "if exist $(OBJDIR) del /Q $(OBJDIR)\*.o & if exist $(TARGET).exe del /Q $(TARGET).exe" 2>nul || true
 
 test: $(TARGET)
 	@echo [*] Running Verification Test on CARD Top Markers and Sample Genome...
 	./$(TARGET) --input data/sample_real.fasta --db data/markers_card_top.csv
 
-.PHONY: all clean test
+unit-test: tests/test_genome_firewall.cpp $(filter-out $(OBJDIR)/main.o $(OBJDIR)/REPLShell.o, $(OBJECTS))
+	$(CXX) $(CXXFLAGS) tests/test_genome_firewall.cpp $(filter-out $(OBJDIR)/main.o $(OBJDIR)/REPLShell.o, $(OBJECTS)) $(LDFLAGS) -o test_suite
+	./test_suite
+	@rm -f test_suite.exe test_suite 2>/dev/null || true
+
+.PHONY: all clean test unit-test

@@ -33,12 +33,15 @@ public:
 
     // Insert an Antimicrobial Resistance marker k-mer into the Trie and Bloom Filter
     void insertMarker(const std::string& marker, int recordIndex);
+    void insertMarker(const char* marker, size_t len, int recordIndex);
 
     // Fast exact marker search (Bloom filter pre-rejection + direct trie descent)
     bool searchExact(const std::string& marker, int* outRecordIndex = nullptr) const;
+    bool searchExact(const char* marker, size_t len, int* outRecordIndex = nullptr) const;
 
     // Mutation-tolerant search (Hamming distance <= maxMismatches)
     bool searchWithMismatch(const std::string& marker, int maxMismatches = 1, int* outRecordIndex = nullptr) const;
+    bool searchWithMismatch(const char* marker, size_t len, int maxMismatches = 1, int* outRecordIndex = nullptr) const;
 
     // String metadata compatibility overloads for legacy/REPL callers
     bool searchExact(const std::string& marker, std::string* outMetadata) const;
@@ -64,6 +67,7 @@ private:
     mutable TrieArena arena;
     AMRBloomFilter bloomFilter;
 
+    bool searchMismatchHelper(const TrieNode* node, const char* marker, size_t len, size_t index, int mismatchesRemaining, int* outRecordIndex) const;
     bool searchMismatchHelper(const TrieNode* node, const std::string& marker, size_t index, int mismatchesRemaining, int* outRecordIndex) const;
 };
 

@@ -4,6 +4,8 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 PredictorEngine::PredictorEngine(const AMRTrie& trie, double confidenceThreshold)
     : trie(trie), confidenceThreshold(confidenceThreshold) {}
@@ -44,7 +46,7 @@ void PredictorEngine::analyzeSequenceFeatures(const std::string& sequence, size_
 }
 
 std::vector<DrugPrediction> PredictorEngine::evaluatePredictionsWithModel(const AMRDatabase& db, const std::vector<int>& featureVector) const {
-    regressor.initializePretrainedWeights(featureVector.size());
+    regressor.calibrateFromDatabase(db);
 
     std::unordered_map<std::string, bool> allDrugs;
     for (const auto& rec : db.getRecords()) {
@@ -302,11 +304,7 @@ void PredictorEngine::renderAsciiScanAnimation(const std::string& targetName, si
     size_t numFrames = sizeof(helixFrames) / sizeof(helixFrames[0]);
     for (size_t i = 0; i < numFrames; ++i) {
         std::cout << "  " << helixFrames[i] << "\n" << std::flush;
-#ifndef _WIN32
-        usleep(30000);
-#else
-        // Brief visual cadence
-#endif
+        std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 
     std::cout << "\n  [PROGRESS] [========================================] 100% COMPLETE\n";
