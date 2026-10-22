@@ -6,6 +6,10 @@ bin/
 *.o
 *.dll
 *.out
+genome_firewall
+test_suite
+fasta_benchmark
+extract_tool
 
 # Massive Datasets & Raw Archives
 db/

@@ -11,6 +11,7 @@
 #include "LogisticRegressor.h"
 #include "ScoringEngine.h"
 #include "ProteomeTranslator.h"
+#include "nucleotide_bitpack.h"
 
 void testBloomFilter() {
     std::cout << "[*] Testing AMRBloomFilter..." << std::endl;
@@ -81,6 +82,26 @@ void testProteomeTranslator() {
     std::cout << "    -> ProteomeTranslator translation & 6-frame tests passed." << std::endl;
 }
 
+void testNucleotideBitpack() {
+    std::cout << "[*] Testing C Nucleotide Bitpacker & O(1) Hamming Distance..." << std::endl;
+    const char* seq1 = "ACGTACGTACGT";
+    uint64_t packed1 = pack_kmer_2bit(seq1, 12);
+
+    char decoded[32];
+    unpack_kmer_2bit(packed1, 12, decoded);
+    assert(std::string(decoded) == "ACGTACGTACGT");
+
+    // Single SNP mismatch: A -> G at position 0
+    const char* seq2 = "GCGTACGTACGT";
+    uint64_t packed2 = pack_kmer_2bit(seq2, 12);
+    int dist = hamming_distance_2bit(packed1, packed2, 12);
+    assert(dist == 1);
+
+    // Identical k-mers have distance 0
+    assert(hamming_distance_2bit(packed1, packed1, 12) == 0);
+    std::cout << "    -> C Nucleotide Bitpack & Hamming distance tests passed." << std::endl;
+}
+
 int main() {
     std::cout << "========================================================\n";
     std::cout << "        GENOME FIREWALL v2.0 - UNIT TEST SUITE          \n";
@@ -90,6 +111,7 @@ int main() {
     testAMRTrie();
     testLogisticRegressor();
     testProteomeTranslator();
+    testNucleotideBitpack();
 
     std::cout << "\n[+] ALL UNIT TESTS COMPLETED SUCCESSFULLY (100% PASS RATE)!\n\n";
     return 0;

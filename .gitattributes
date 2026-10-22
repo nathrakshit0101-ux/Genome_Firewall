@@ -1,0 +1,15 @@
+# GitHub Linguist Language Overrides
+# Ensure repository language statistics reflect the C and C++ high-performance core engine
+
+# Treat auxiliary Python utilities as vendored scripts / non-detectable
+*.py linguist-detectable=false
+*.py linguist-vendored
+scripts/** linguist-vendored
+scripts/** linguist-documentation
+scripts/*.py linguist-detectable=false
+scripts/*.py linguist-vendored
+
+# Ensure C and C++ are explicitly classified and detectable
+*.cpp linguist-detectable=true
+*.h linguist-detectable=true
+*.c linguist-detectable=true
