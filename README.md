@@ -444,12 +444,12 @@ You can enter commands interactively or pipe commands from `repl_commands.txt`:
 [*] Loading AMR Reference Catalog from: data/markers_card_top.csv...
 [*] Routing to Native CSV Parser for: data/markers_card_top.csv
 [+] Successfully ingested 455 markers (447443 unique k-mers) into the Trie Arena.
-    -> Indexed 455 AMR signatures in 4-ary Prefix Trie (4500462 nodes, Arena: 88000 KB)
+    -> Indexed 455 AMR signatures in 4-ary Prefix Trie (4500462 nodes, Arena: 176000 KB)
     -> Fast-Rejection Bloom Filter initialized (1048576 bits)
-    -> Load & Index Time: 383.093 ms
+    -> Load & Index Time: 270.58 ms
 
 [*] Initializing Zero-Copy Sequence Ingestion for: data/sample_real.fasta...
-[+] Memory-Mapped Zero-Copy I/O active for data/sample_real.fasta (3564 bytes mapped).
+[+] Memory-Mapped Zero-Copy I/O active for data/sample_real.fasta (3661 bytes mapped).
 [+] Scan completed across 1 chunks (3 KB scanned).
 
 +---------------------------------------------------------------------------------------------------+
@@ -457,22 +457,40 @@ You can enter commands interactively or pipe commands from `repl_commands.txt`:
 +---------------------------------------------------------------------------------------------------+
 | ANTIBIOTIC      | PREDICTION      | PROBABILITY   | CONFIDENCE  | EVIDENCE   | CLINICAL RECOMMENDATION   |
 +---------------------------------------------------------------------------------------------------+
-| Lincosamides    | NO-CALL         | 0.3517        | 70.3%       | [Tier II]  | PROCEED WITH CLINICAL CAUTION |
-| Tetracyclines   | LIKELY TO WORK  | 0.0036        | 99.6%       | [Tier III] | VIABLE DRUG TARGET (Susceptible) |
-| Macrolides      | NO-CALL         | 0.6829        | 63.4%       | [Tier II]  | PROCEED WITH CLINICAL CAUTION |
-| Carbapenems     | LIKELY TO FAIL  | 0.9804        | 98.0%       | [Tier I]   | DO NOT PRESCRIBE (Resistant) |
-| Cephalosporins  | LIKELY TO FAIL  | 0.9916        | 99.2%       | [Tier I]   | DO NOT PRESCRIBE (Resistant) |
-| Sulfonamides    | LIKELY TO WORK  | 0.0000        | 100.0%      | [Tier III] | VIABLE DRUG TARGET (Susceptible) |
-| Phenicols       | LIKELY TO WORK  | 0.0546        | 94.5%       | [Tier III] | VIABLE DRUG TARGET (Susceptible) |
-| Aminoglycosides | LIKELY TO WORK  | 0.0728        | 92.7%       | [Tier III] | VIABLE DRUG TARGET (Susceptible) |
-| Glycopeptides   | NO-CALL         | 0.8396        | 32.1%       | [Tier II]  | PROCEED WITH CLINICAL CAUTION |
-| Fluoroquinolones| LIKELY TO WORK  | 0.0096        | 99.0%       | [Tier III] | VIABLE DRUG TARGET (Susceptible) |
-| Rifamycins      | LIKELY TO WORK  | 0.0013        | 99.9%       | [Tier III] | VIABLE DRUG TARGET (Susceptible) |
+| Sulfonamides    | LIKELY TO WORK  | 0.0293        | 97.1%       | [Tier III] | VIABLE DRUG TARGET (Susceptible) |
+| Glycopeptides   | LIKELY TO WORK  | 0.0293        | 97.1%       | [Tier III] | VIABLE DRUG TARGET (Susceptible) |
+| Tetracyclines   | LIKELY TO FAIL  | 0.9994        | 99.9%       | [Tier I]   | DO NOT PRESCRIBE (Resistant) |
+| Rifamycins      | LIKELY TO WORK  | 0.0293        | 97.1%       | [Tier III] | VIABLE DRUG TARGET (Susceptible) |
+| Fluoroquinolones| LIKELY TO FAIL  | 1.0000        | 100.0%      | [Tier I]   | DO NOT PRESCRIBE (Resistant) |
+| Macrolides      | LIKELY TO FAIL  | 0.9994        | 99.9%       | [Tier I]   | DO NOT PRESCRIBE (Resistant) |
+| Carbapenems     | LIKELY TO FAIL  | 1.0000        | 100.0%      | [Tier I]   | DO NOT PRESCRIBE (Resistant) |
+| Phenicols       | LIKELY TO FAIL  | 0.9994        | 99.9%       | [Tier I]   | DO NOT PRESCRIBE (Resistant) |
+| Aminoglycosides | LIKELY TO FAIL  | 0.9994        | 99.9%       | [Tier I]   | DO NOT PRESCRIBE (Resistant) |
+| Lincosamides    | LIKELY TO WORK  | 0.0293        | 97.1%       | [Tier III] | VIABLE DRUG TARGET (Susceptible) |
+| Cephalosporins  | LIKELY TO FAIL  | 1.0000        | 100.0%      | [Tier I]   | DO NOT PRESCRIBE (Resistant) |
 +---------------------------------------------------------------------------------------------------+
-| Telemetry: 3 KB Scanned | Inference Time: 21.99 ms (0.15 MB/s) |
+| Telemetry: 3 KB Scanned | Inference Time: 8.90 ms (0.37 MB/s) |
 +---------------------------------------------------------------------------------------------------+
 WARNING: Defensive decision support only. All results must be confirmed by standard
 laboratory antimicrobial susceptibility testing before clinical application.
++---------------------------------------------------------------------------------------------------+
+
++===================================================================================================+
+|                          GENOME FIREWALL v2.0 - BIOSECURITY TRUST SCORE                           |
++===================================================================================================+
+|  OVERALL BIOSECURITY TRUST SCORE : [   96.6%  ]  [ ***** ] (HIGH CLINICAL RELIABILITY)             |
++---------------------------------------------------------------------------------------------------+
+|  DIAGNOSTIC TELEMETRY METRIC                      | VALUE     | BENCHMARK CLINICAL SPECIFICATION   |
++---------------------------------------------------------------------------------------------------+
+|  1. Sequence Fidelity (Exact / Mutated SNP Ratio) | 99.9%     | > 90% (Strict 4-ary Identity)       |
+|  2. Genomic K-mer Sampling Depth (Coverage)       | 90.1%     | > 85% (Continuous Page Stream)      |
+|  3. Model Decision Margin (Entropy Sharpness)     | 97.8%     | > 80% (Clear Logistic Separation)   |
+|  4. Determinant Signal-to-Noise Ratio (SNR)       | 45.0 dB   | > 20 dB (Low Homology Crosstalk)    |
+|  5. Estimated False Discovery Rate (FDR)          | < 0.2%    | < 5.0% Clinical Safety Standard     |
++---------------------------------------------------------------------------------------------------+
+|  Clinical Verdict : HIGH CLINICAL TRUST: Determinant signatures sharply resolved with high statistical power. |
+|  Reference Basis  : Comprehensive Antibiotic Resistance Database (CARD 2026 Curated Models)       |
++===================================================================================================+
 +---------------------------------------------------------------------------------------------------+
 
 [*] Total Execution Wall-Clock Time: 406.08 ms

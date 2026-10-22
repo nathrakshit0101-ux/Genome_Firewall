@@ -15,6 +15,11 @@
   - **GitHub:** [@Skeletor-Pirate](https://github.com/Skeletor-Pirate)
   - **Contributions:** Native multithreading optimization with `std::async`, build system improvements, k-mer indexing bug fixes, and real-world MDR *E. coli* dataset (`sample_real.fasta`, `markers_large.csv`) integration.
 
+* **Rakshit Nath**
+  - **GitHub:** [@nathrakshit0101-ux](https://github.com/nathrakshit0101-ux)
+  - **Email:** [nathrakshit0101@gmail.com](mailto:nathrakshit0101@gmail.com)
+  - **Contributions:** Zero-copy k-mer stream triage, complete 64-codon NCBI genetic translation, elimination of synthetic training noise, real-time empirical AMR calibration, unit test suite, and performance optimization.
+
 * **Aanya Singh**
   - **GitHub:** [@aanya10112007-blip](https://github.com/aanya10112007-blip)
   - **Email:** [aanya.10112007@gmail.com](mailto:aanya.10112007@gmail.com)
